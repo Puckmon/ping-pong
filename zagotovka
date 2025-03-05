@@ -1,5 +1,4 @@
 from pygame import *
-from random import randint
 window = display.set_mode((700, 500))
 display.set_caption('Пинг понг')
 background = transform.scale(image.load('background.jpg'), (700, 500))
@@ -24,29 +23,27 @@ class Player(Gamesprite):
 class Player2(Gamesprite):
     def update(self):
         keys_pressed = key.get_pressed()
-        if keys_pressed[K_DOWN] and self.rect.y > 5:
+        if keys_pressed[K_UP] and self.rect.y > 5:
             self.rect.y -= self.speed
-        if keys_pressed[K_UP] and self.rect.y < 350:
+        if keys_pressed[K_DOWN] and self.rect.y < 350:
             self.rect.y += self.speed    
 
-class Ball(Gamesprite):
-    def update(self):
-        self.rect.x += self.speed
-        if self.rect.x >= 700:
-            self.rect.x = 315
 
 
-player_a = Player('rocket.png', 0, 10, 20, 20, 150)
-player_b = Player2('rocket.png', 680, 10, 20, 20, 150)
-ball = Ball('ball.png', 315, 215, randint(10, 15), 80, 50)
+player_a = Player('rocket.png', 0, 10, 7, 20, 150)
+player_b = Player2('rocket.png', 680, 10, 7, 20, 150)
+ball = Gamesprite('ball.png', 315, 215, 5, 60, 60)
 
-
-player_a_score = 0
-player_b_score = 0
-clock = time.Clock()
 font.init()
-font2 = font.SysFont('Arial', 70)
-win = font2.render('', True, (225, 215, 0))
+font1 = font.Font(None, 35)
+lose1 = font1.render('PLAYER 1 LOSE!', True, (200, 0, 0))
+lose2 = font1.render('PLAYER 2 LOSE!', True, (200, 0, 0))
+
+speed_y = 4
+speed_x = 4
+win_height = 500
+
+clock = time.Clock()
 
 finish = False
 FPS = 60
@@ -56,17 +53,25 @@ while game:
         if e.type == QUIT:
             game = False
 
-                    
     if finish != True:
+        ball.rect.x += speed_x
+        ball.rect.y += speed_y
 
         window.blit(background,(0, 0))
-
+        player_a.update()
+        player_b.update()
+        if ball.rect.x <0:
+            finish = True
+            window.blit(lose1, (250, 200))  
+        if ball.rect.x >700:
+            finish = True
+            window.blit(lose2, (250, 200))
+        if sprite.collide_rect(player_a, ball) or sprite.collide_rect(player_b, ball):
+            speed_x *= -1
+        if ball.rect.y > win_height-50 or ball.rect.y <0:
+            speed_y *= -1
         ball.reset()
         player_a.reset()
         player_b.reset()
-        display.update()
-
     clock.tick(FPS)
-    time.delay(50)
-
-#заготовка игры
+    display.update()
